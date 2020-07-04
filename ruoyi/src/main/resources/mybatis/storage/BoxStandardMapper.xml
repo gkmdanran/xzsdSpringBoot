@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.storage.mapper.BoxStandardMapper">
+
+    <resultMap type="com.ruoyi.project.storage.domain.vo.BoxStandardVO" id="BoxStandardResult">
+        <result property="id"    column="id"    />
+        <result property="boxStandard"    column="box_standard"    />
+        <result property="boxUnitPrice"    column="box_unit_price"    />
+        <result property="remark"    column="remark"    />
+        <result property="sortNo"    column="sort_no"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="version"    column="version"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="totalNumber"    column="total_number"    />
+        <result property="usedNumber"    column="used_number"    />
+        <result property="inventoryNumber"    column="inventory_number"    />
+        <result property="useRatio"    column="use_ratio"    />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.project.storage.domain.vo.BoxStandardSelectVO" id="BoxStandardSelectResult">
+        <result property="id"    column="id"    />
+        <result property="boxStandard"    column="box_standard"    />
+        <result property="boxUnitPrice"    column="box_unit_price"    />
+    </resultMap>
+
+    <sql id="boxStandardSelectVo">
+        SELECT
+            standard.id,
+            standard.box_standard,
+            standard.box_unit_price
+        FROM
+            t_box_standard standard
+        LEFT JOIN t_box_info info ON standard.box_standard = info.box_standard
+        AND info.del_flag = '0'
+    </sql>
+
+    <select id="selectBoxStandardList" parameterType="com.ruoyi.project.storage.domain.vo.BoxStandardVO" resultMap="BoxStandardResult">
+        SELECT
+            temp.id,
+            temp.box_standard,
+            temp.box_unit_price,
+            temp.remark,
+            temp.sort_no,
+            temp.create_time,
+            temp.create_by,
+            temp.update_time,
+            temp.update_by,
+            temp.version,
+            temp.del_flag,
+            temp.total AS total_number,
+            IFNULL(temp.used, 0) AS used_number,
+            IFNULL(temp.total - temp.used, 0) AS inventory_number,
+            CONCAT(
+                    ROUND(
+                        IFNULL(temp.used / temp.total, 0) * 100,
+                        2
+                    ),
+                    '%'
+                ) AS use_ratio
+        FROM
+            (
+                SELECT
+                    standard.id,
+                    standard.box_standard,
+                    standard.box_unit_price,
+                    standard.remark,
+                    standard.sort_no,
+                    standard.create_time,
+                    standard.create_by,
+                    standard.update_time,
+                    standard.update_by,
+                    standard.version,
+                    standard.del_flag,
+                    count(info.is_used) AS total,
+                    sum(info.is_used) AS used
+                FROM
+                    t_box_standard standard
+                LEFT JOIN t_box_info info ON standard.box_standard = info.box_standard
+                AND info.del_flag = '0'
+                WHERE
+                    standard.del_flag = '0'
+                <if test="searchValue !=null and searchValue != ''">
+                    AND standard.box_standard LIKE concat(#{searchValue}, '%')
+                </if>
+                GROUP BY
+                    standard.box_standard
+            ) temp
+    </select>
+
+    <insert id="insertBoxStandard" parameterType="com.ruoyi.project.storage.domain.BoxStandard" useGeneratedKeys="true" keyProperty="id">
+        insert into t_box_standard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="boxStandard != null  and boxStandard != ''">box_standard,</if>
+            <if test="boxUnitPrice != null ">box_unit_price,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="sortNo != null ">sort_no,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="version != null ">version,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="boxStandard != null  and boxStandard != ''">#{boxStandard},</if>
+            <if test="boxUnitPrice != null ">#{boxUnitPrice},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="sortNo != null ">#{sortNo},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="version != null ">#{version},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="deleteBoxStandardByIds" parameterType="Map">
+        update t_box_standard
+           set del_flag = '2',
+               version = version + 1,
+               update_time = #{time},
+               update_by = #{user}
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="selectBoxStandardSelectList" resultMap="BoxStandardSelectResult">
+        <include refid="boxStandardSelectVo"/>
+        WHERE
+            standard.del_flag = '0'
+        GROUP BY
+            standard.box_standard
+    </select>
+
+    <select id="selectBoxStandardEffectiveList" resultMap="BoxStandardSelectResult">
+        <include refid="boxStandardSelectVo"/>
+        AND info.is_used = 0
+        WHERE
+            standard.del_flag = '0'
+        GROUP BY
+            standard.box_standard
+        HAVING
+            COUNT(info.id) > 0
+    </select>
+
+    <select id="selectBoxStandardByStandard" parameterType="com.ruoyi.project.storage.domain.BoxStandard" resultMap="BoxStandardSelectResult">
+        SELECT
+            id,
+            box_standard,
+            box_unit_price
+        FROM
+            t_box_standard
+        WHERE
+            del_flag = '0'
+        AND box_standard = #{boxStandard}
+    </select>
+
+    <select id="selectBoxInfoCountByIds" parameterType="String" resultType="int">
+        SELECT
+            count(info.id)
+        FROM
+            t_box_standard standard
+        LEFT JOIN t_box_info info ON standard.box_standard = info.box_standard
+        AND info.del_flag = '0'
+        WHERE
+            standard.del_flag = '0'
+        AND standard.id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.CarMapper">
+    <insert id="addCar" parameterType="com.ruoyi.project.zxsd.sys.domain.CarEntity">
+        INSERT INTO t_shop_car
+        (
+        user_code,
+        sku_no,
+        cnt,
+        is_deleted,
+        id,
+        gmt_create,
+        create_by,
+        gmt_modified,
+        last_modified_by,
+        is_checked,
+        sort_no,
+        store_no
+        )VALUES (
+        #{userCode},
+        #{skuNo},
+        #{cnt},
+        0,
+        #{id},
+        now(),
+        #{createBy},
+        now(),
+        #{updateBy},
+        0,
+        #{sortNo},
+        #{storeNo}
+        )
+    </insert>
+    <select id="selectCar" parameterType="com.ruoyi.project.zxsd.sys.domain.CarEntity" resultType="com.ruoyi.project.zxsd.sys.domain.CarEntity">
+      SELECT
+        user_code as userCode,
+        sku_no as skuNo,
+        cnt as cnt,
+        id as id,
+        is_checked as isChecked,
+        sort_no as sortNo,
+        store_no as storeNo
+      FROM t_shop_car
+      WHERE is_deleted=0
+        and user_code=#{userCode}
+        <if test="skuNo !='' and skuNo != null">
+            and sku_no = #{skuNo}
+        </if>
+
+    </select>
+    <delete id="delCar" parameterType="String">
+        DELETE FROM t_shop_car WHERE is_checked=1 and user_code=#{userCode}
+    </delete>
+    <update id="updateCnt" parameterType="com.ruoyi.project.zxsd.sys.domain.CarEntity">
+        update t_shop_car set cnt=#{cnt} where  id=#{id}
+    </update>
+    <update id="updateChecked" parameterType="com.ruoyi.project.zxsd.sys.domain.CarEntity">
+        update t_shop_car set is_checked=#{isChecked} where id=#{id}
+    </update>
+</mapper>

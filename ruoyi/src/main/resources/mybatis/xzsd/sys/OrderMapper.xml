@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.OrderMapper">
+    <insert id="insertOrder" parameterType="com.ruoyi.project.zxsd.sys.domain.OrderEntity">
+      INSERT INTO t_order_master
+      (
+      order_no,
+      user_code,
+      shipping_user,
+      order_money,
+      district_money,
+      shipping_money,
+      payment_money,
+      pay_time,
+      order_status,
+      receiver_no,
+      is_deleted,
+      id,
+      sort_no,
+      gmt_create,
+      create_by,
+      gmt_modified,
+      last_modified_by,
+      version,
+      remark,
+      store_no,
+      store_name,
+      driver
+      )values(
+      #{orderNo},
+      #{userCode},
+      #{shippingUser},
+      #{orderMoney},
+      #{districtMoney},
+      #{shippingMoney},
+      #{paymentMoney},
+      now(),
+      0,
+      #{receiverNo},
+      0,
+      #{id},
+      #{sortNo},
+      now(),
+      #{createBy},
+      now(),
+      #{updateBy},
+      0,
+      #{remark},
+      #{storeNo},
+      #{storeName},
+      #{driver}
+      )
+    </insert>
+    <insert id="insertOrderDetail" parameterType="com.ruoyi.project.zxsd.sys.domain.OrderDetailEntity">
+      INSERT  INTO t_order_detail
+      (
+      order_detail_code,
+      sku_no,
+      goods_name,
+      goods_cnt,
+      goods_price,
+      fee_money,
+      channel_type,
+      is_deleted,
+      id,
+      sort_no,
+      gmt_create,
+      create_by,
+      gmt_modified,
+      last_modified_by,
+      version,
+      order_no,
+      is_appraise,
+      is_received,
+      is_shipped
+      )values(
+      #{orderDetailCode},
+      #{skuNo},
+      #{goodsName},
+      #{goodsCnt},
+      #{goodsPrice},
+      #{feeMoney},
+      0,
+      0,
+      #{id},
+      #{sortNo},
+      now(),
+      #{createBy},
+      now(),
+      #{updateBy},
+      0,
+      #{orderNo},
+      0,
+      0,
+      0
+      )
+    </insert>
+    <select id="selectOrder" parameterType="com.ruoyi.project.zxsd.sys.domain.OrderEntity" resultType="com.ruoyi.project.zxsd.sys.domain.OrderEntity">
+      select
+      od.order_no as orderNo,
+      od.user_code as userCode,
+      od.shipping_user as shippingUser,
+      od.order_money as orderMoney,
+      od.district_money as districtMoney,
+      od.shipping_money as shippingMoney,
+      od.payment_money as paymentMoney,
+      od.pay_time as payTime,
+      od.order_status as orderStatus,
+      od.receiver_no as receiverNo,
+      od.id as id,
+      us.user_realname as userRealName,
+      us.phone as phone,
+      us.role as role,
+      store_no as storeNo,
+      store_name as storeName,
+      driver as driver
+      FROM t_order_master od,t_sys_user us
+      where od.user_code =us.user_code and od.is_deleted=0
+          <if test="storeNo != null and storeNo!= ''">
+            and od.store_no = #{storeNo}
+          </if>
+          <if test="userRealName != null and userRealName!= ''">
+            and us.user_realname = #{userRealName}
+          </if>
+          <if test="orderNo != null and orderNo!= ''">
+            and od.order_no = #{orderNo}
+          </if>
+          <if test="shippingUser != null and shippingUser!= ''">
+            and od.shipping_user = #{shippingUser}
+          </if>
+          <if test="orderStatus !=10">
+            and order_status = #{orderStatus}
+          </if>
+          <if test="orderStart!=null and orderOver!=null">
+            and od.pay_time BETWEEN #{orderStart} and #{orderOver}
+          </if>
+          <if test="userCode != null and userCode!= '' and role!=0">
+            and od.user_code = #{userCode}
+          </if>
+
+    </select>
+    <select id="selectDetails" parameterType="com.ruoyi.project.zxsd.sys.domain.OrderDetailEntity" resultType="com.ruoyi.project.zxsd.sys.domain.OrderDetailEntity">
+      SELECT
+      order_detail_code as orderDetailCode,
+      sku_no as skuNo,
+      goods_name as goodsName,
+      goods_cnt as goodsCnt,
+      goods_price as goodsPrice,
+      fee_money as feeMoney,
+      id as id ,
+      order_no as orderNo,
+      is_appraise as isAppraise,
+      is_received as isReceived,
+      is_shipped as isShipped,
+      gmt_create as createTime
+      from t_order_detail
+      where 1=1
+      <if test="orderNo != null and orderNo!= ''">
+        and order_no = #{orderNo}
+      </if>
+      <if test="orderDetailCode != null and orderDetailCode!= ''">
+        and order_detail_code = #{orderDetailCode}
+      </if>
+    </select>
+    <update id="changeOrderStatus"  parameterType="com.ruoyi.project.zxsd.sys.domain.OrderEntity">
+      UPDATE t_order_master SET
+      <if test="'5'.toString()==OdFlag.toString()">
+        receive_time=now(),
+      </if>
+      <if test="'6'.toString()==OdFlag.toString()">
+        receive_time=NULL,
+      </if>
+        order_status=#{OdFlag},
+        gmt_modified=now(),
+        last_modified_by=#{updateBy}
+      where order_no=#{orderNo}
+    </update>
+  <update id="changeDetailStatus"  parameterType="com.ruoyi.project.zxsd.sys.domain.OrderDetailEntity">
+    UPDATE t_order_detail SET
+    <if test="'3'.toString()==OdFlag.toString()">
+      is_shipped=1,
+      shipping_time=now(),
+    </if>
+    <if test="'4'.toString()==OdFlag.toString()">
+      is_shipped=0,
+      shipping_time=NULL,
+    </if>
+    <if test="'5'.toString()==OdFlag.toString()">
+      is_received=1,
+      receive_time=now(),
+    </if>
+    <if test="'6'.toString()==OdFlag.toString()">
+      is_received=0,
+      receive_time=NULL,
+    </if>
+    gmt_modified=now(),
+    last_modified_by=#{updateBy}
+    where  order_no=#{orderNo}
+  </update>
+  <update id="updateGoods" parameterType="com.ruoyi.project.zxsd.sys.domain.GoodsEntity">
+    UPDATE  t_goods_sku set
+    sale_cnt=#{saleCnt},
+    amount_cnt=#{amountCnt}
+    where sku_no=#{skuNo}
+  </update>
+</mapper>

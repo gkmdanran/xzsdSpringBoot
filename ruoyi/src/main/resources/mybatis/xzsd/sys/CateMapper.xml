@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.CateMapper">
+    <insert id="insertCate" parameterType="com.ruoyi.project.zxsd.sys.domain.CateEntity">
+      INSERT into t_code_cate
+        ( cate_code,
+          cate_name,
+          cate_code_parent,
+          level,
+          remark,
+          is_parent,
+          is_deleted,
+          id,
+          sort_no,
+          gmt_create,
+          create_by,
+          gmt_modified,
+          last_modified_by,
+          version)
+          VALUES(
+          #{cateCode},
+          #{cateName},
+          #{cateCodeParent},
+          #{level},
+          #{remark},
+          #{isParent},
+          0,
+          #{id},
+          #{sortNo},
+          now(),
+          #{createBy},
+          now(),
+          #{updateBy},
+          0)
+    </insert>
+    <select id="getParentLevel" parameterType="String" resultType="int">
+        select p.level from t_code_cate p where p.cate_code = #{cateCodeParent}
+    </select>
+  <select id="selectCate"  resultType="com.ruoyi.project.zxsd.sys.domain.CateEntity">
+    SELECT
+    cate_code as cateCode,
+    cate_name as cateName,
+    cate_code_parent as cateCodeParent,
+    level as level,
+    remark as remark ,
+    is_parent as isParent
+    from t_code_cate where is_deleted=0
+
+  </select>
+  <select id="getCateInfo" parameterType="String" resultType="com.ruoyi.project.zxsd.sys.domain.CateEntity">
+    SELECT
+    cate_code as cateCode,
+    cate_name as cateName,
+    cate_code_parent as cateCodeParent,
+    level as level,
+    remark as remark ,
+    is_parent as isParent
+    from t_code_cate where is_deleted=0
+    <if test="cateCode !='' and cateCode != null">
+      and cate_code = #{cateCode}
+    </if>
+  </select>
+  <update id="delCate" parameterType="String">
+    UPDATE t_code_cate set is_deleted =1 where cate_code=#{cateCode}
+  </update>
+  <update id="editCate" parameterType="com.ruoyi.project.zxsd.sys.domain.CateEntity">
+    update t_code_cate
+    SET cate_name =#{cateName},
+      remark=#{remark},
+      gmt_modified=now(),
+      last_modified_by= #{updateBy}
+      where cate_code=#{cateCode}
+  </update>
+
+  <select id="selectFirstCate" resultType="com.ruoyi.project.zxsd.sys.domain.CateEntity">
+    select cate_code as cateCode,
+            cate_name as cateName
+            FROM t_code_cate where level=1 and is_deleted=0
+  </select>
+  <select id="selectSecondCate" parameterType="String" resultType="com.ruoyi.project.zxsd.sys.domain.CateEntity">
+    select cate_code as cateCode,
+    cate_name as cateName
+    FROM t_code_cate where cate_code_parent=#{cateCodeParent} and is_deleted=0
+  </select>
+</mapper>

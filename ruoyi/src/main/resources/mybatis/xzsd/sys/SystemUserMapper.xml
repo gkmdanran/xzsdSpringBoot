@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.SystemUserMapper">
+
+    <select id="getSystemUserByUserName" parameterType="String" resultType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+      select
+      u.user_id as userId,
+      u.user_name as userName,
+      u.nick_name as nickName,
+      su.user_realname as userRealname,
+      su.is_admin as isAdmin,
+      su.id_card as idCard,
+      su.sex as sex,
+      su.tel as tel,
+      su.phone as phone,
+      su.email as email,
+      su.id as id,
+      su.sort_no as sortNo,
+      su.role as role,
+      u.password as password
+      from sys_user u,t_sys_user su
+      where u.user_id = su.user_code
+      and u.user_name = #{userNmae} and su.is_deleted = '0'
+    </select>
+
+    <insert id="insertSystemUser" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        insert into sys_user(user_id,user_name,nick_name,password,del_flag)
+        VALUES
+        (#{userId},#{userName},#{nickName},#{password},0)
+    </insert>
+    <insert id="insertSystemUserInfo" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        insert into t_sys_user
+        (user_code,user_realname,is_admin,id_card,sex,tel,phone,email,remark,is_deleted,id,sort_no,gmt_create,create_by,gmt_modified,last_modified_by,role,invite_code)
+        VALUES
+        (#{userId},#{userRealname},#{isAdmin},#{idCard},#{sex},#{tel},#{phone},#{email},#{remark},0,#{id},#{sortNo},now(),#{createBy},now(),#{updateBy},#{role},#{inviteCode})
+    </insert>
+
+    <select id="getMaxSortNo" parameterType="String" resultType="int">
+        select max(su.sort_no) from ${tableName} su
+    </select>
+
+    <update id="editSystemUser" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        update sys_user
+        SET
+        nick_name = #{nickName}
+        where user_id = #{userId}
+    </update>
+    <update id="editSystemUserInfo" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        update t_sys_user
+        SET
+        user_realname = #{userRealname},
+        is_admin = #{isAdmin},
+        id_card = #{idCard},
+        sex = #{sex},
+        tel = #{tel},
+        phone = #{phone},
+        email = #{email},
+        remark = #{remark},
+        gmt_modified = now(),
+        last_modified_by = #{updateBy},
+        role = #{role},
+        invite_code=#{inviteCode}
+        where user_code = #{userId}
+    </update>
+    <update id="deleteSystemUserInfo" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        update t_sys_user
+        SET
+        is_deleted = '1'
+        where user_code = #{userId}
+    </update>
+    <update id="deleteSystemUser" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        update sys_user
+        SET
+        del_flag = '1'
+        where user_id = #{userId}
+    </update>
+    <select id="selectUser" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity" resultType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+       select s.user_name as userName,
+        t.user_realname as userRealname,
+        t.role as role,
+        t.sex as sex,
+        t.phone as phone,
+        t.email as email,
+        t.id_card as idCard,
+        t.user_code as userId,
+        t.invite_code as inviteCode
+       from sys_user s,t_sys_user t WHERE s.user_id = t.user_code and t.is_deleted = 0
+        <if test="userRealname!=null and userRealname!=''">
+            and t.user_realname like "%${userRealname}%"
+        </if>
+        <if test="userName!=null and userName!=''">
+            and s.user_name like "%${userName}%"
+        </if>
+        <if test="role!=5">
+            and t.role = #{role}
+        </if>
+        <if test="userId!=null and userId!=''">
+            and t.user_code=#{userId}
+        </if>
+        ORDER BY t.gmt_create DESC
+    </select>
+    <update id="editInviteCode" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemUserEntity">
+        UPDATE t_sys_user
+        SET
+         invite_code=#{inviteCode}
+        where user_code = #{userId}
+    </update>
+</mapper>

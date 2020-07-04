@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.storage.mapper.BoxInfoMapper">
+
+    <resultMap type="com.ruoyi.project.storage.domain.vo.BoxInfoVO" id="BoxInfoVOResult">
+        <result property="id"    column="id"    />
+        <result property="boxCode"    column="box_code"    />
+        <result property="boxStandard"    column="box_standard"    />
+        <result property="boxUnitPrice"    column="box_unit_price"    />
+        <result property="usedBy"    column="used_by"    />
+        <result property="usedByName"    column="nick_name"    />
+        <result property="isUsed"    column="is_used"    />
+        <result property="remark"    column="remark"    />
+        <result property="sortNo"    column="sort_no"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="version"    column="version"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.project.storage.domain.vo.BoxInfoSelectVO" id="BoxInfoSelectResult">
+        <result property="id"    column="id"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <sql id="selectBoxInfoVo">
+        SELECT
+            t1.id,
+            t1.box_code,
+            t1.box_standard,
+            t1.box_unit_price,
+            t1.used_by,
+            t2.nick_name,
+            t1.is_used,
+            t1.remark,
+            t1.sort_no,
+            t1.create_time,
+            t1.create_by,
+            t1.update_time,
+            t1.update_by,
+            t1.version,
+            t1.del_flag
+        FROM
+            t_box_info t1
+        LEFT JOIN sys_user t2 ON t1.used_by = t2.user_id
+    </sql>
+
+    <select id="selectBoxInfoList" resultType="com.ruoyi.project.storage.domain.vo.BoxInfoVO" resultMap="BoxInfoVOResult">
+        <include refid="selectBoxInfoVo"/>
+        <where>
+            and t1.del_flag = '0'
+            <if test="boxStandard !=null and boxStandard != ''">
+                and t1.box_standard = #{boxStandard}
+            </if>
+            <if test="isUsed !=null">
+                and t1.is_used = #{isUsed}
+            </if>
+            <if test="usedByName !=null and usedByName != ''">
+                and t2.nick_name like concat(#{usedByName}, '%')
+            </if>
+        </where>
+        order by t1.update_time desc
+    </select>
+
+    <insert id="insertBoxInfo" parameterType="com.ruoyi.project.storage.domain.BoxInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into t_box_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="boxCode != null ">box_code,</if>
+            <if test="boxStandard != null  and boxStandard != ''">box_standard,</if>
+            <if test="boxUnitPrice != null ">box_unit_price,</if>
+            <if test="usedBy != null ">used_by,</if>
+            <if test="isUsed != null ">is_used,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="sortNo != null ">sort_no,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="version != null ">version,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="boxCode != null ">#{boxCode},</if>
+            <if test="boxStandard != null  and boxStandard != ''">#{boxStandard},</if>
+            <if test="boxUnitPrice != null ">#{boxUnitPrice},</if>
+            <if test="usedBy != null ">#{usedBy},</if>
+            <if test="isUsed != null ">#{isUsed},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="sortNo != null ">#{sortNo},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="version != null ">#{version},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="deleteBoxInfoByIds">
+        update t_box_info
+           set del_flag = '2',
+               version = version + 1,
+               update_time = #{time},
+               update_by = #{user}
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="selectUnfinishedOrderCountByIds" resultType="int">
+        SELECT
+            count(id)
+        FROM
+            t_order
+        WHERE
+            status &lt;&gt; 10
+        AND box_id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectAvailableBoxListByBoxStandard" parameterType="java.lang.String" resultMap="BoxInfoSelectResult">
+        SELECT
+            id,
+            version
+        FROM
+            t_box_info
+        WHERE
+            box_standard = #{boxStandard}
+        AND del_flag = '0'
+        AND is_used = 0
+    </select>
+
+    <insert id="batchInsertBoxInfo" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        insert into t_box_info(box_code,box_standard,box_unit_price,used_by,is_used,remark,sort_no,create_time,create_by,update_time,update_by,version,del_flag)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+                #{item.boxCode},
+                #{item.boxStandard},
+                #{item.boxUnitPrice},
+                #{item.usedBy},
+                #{item.isUsed},
+                #{item.remark},
+                #{item.sortNo},
+                #{item.createTime},
+                #{item.createBy},
+                #{item.updateTime},
+                #{item.updateBy},
+                #{item.version},
+                #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

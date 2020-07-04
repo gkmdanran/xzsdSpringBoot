@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.SystemMenuMapper">
+
+    <insert id="insertSysMenu" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemMenuEntity">
+        INSERT into t_sys_menu
+        (menu_code,
+        menu_name,
+        menu_url,
+        parent_menu_code,
+        type,
+        level,
+        auth_code,
+        remark,
+        icon,
+        is_deleted,
+        id,
+        sort_no,
+        gmt_create,
+        create_by,
+        gmt_modified,
+        last_modified_by)
+        VALUES
+        (#{menuCode},
+        #{menuName},
+        #{menuUrl},
+        #{parentMenuCode},
+        #{type},
+        #{level},
+        #{authCode},
+        #{remark},
+        #{icon},
+        '0',
+        #{id},
+        #{sortNo},
+        now(),
+        #{createBy},
+        now(),
+        #{updateBy})
+    </insert>
+
+    <select id="getMenuByUserRole" parameterType="int" resultType="com.ruoyi.project.zxsd.sys.domain.SystemMenuEntity">
+        select
+        m.menu_code as menuCode,
+        m.menu_name as menuName,
+        m.parent_menu_code as parentMenuCode,
+        m.menu_url as menuUrl,
+        m.level as level,
+        m.icon as icon,
+        m.remark as remark,
+        m.auth_code as authCode
+        from t_sys_menu m
+        where 1=1
+        <if test="userRole !='' and userRole != null">
+           and m.auth_code >= #{userRole}
+        </if>
+        and m.is_deleted = '0'
+    </select>
+    <select id="getParentLevel" parameterType="String" resultType="int">
+        select p.level from t_sys_menu p where p.menu_code = #{parentMenuCode}
+    </select>
+    <update id="editSysMenu" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemMenuEntity">
+        update t_sys_menu set menu_name=#{menuName},menu_url=#{menuUrl},remark=#{remark},icon=#{icon},auth_code=#{authCode} WHERE menu_code=#{menuCode}
+    </update>
+    <update id="delSysMenu" parameterType="com.ruoyi.project.zxsd.sys.domain.SystemMenuEntity">
+        update t_sys_menu set is_deleted=1 where menu_code=#{menuCode}
+    </update>
+</mapper>

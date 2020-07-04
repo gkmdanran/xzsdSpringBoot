@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.storage.mapper.AdvertisementMapper">
+
+    <resultMap type="com.ruoyi.project.storage.domain.Advertisement" id="AdvertisementResult">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="imgUrl" column="img_url"/>
+        <result property="points" column="points"/>
+        <result property="isEnable" column="is_enable"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="version" column="version"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectAdvertisementVo">
+        select id, title, content, img_url, points, is_enable, sort_no, create_time, create_by, update_time, update_by, version, del_flag from t_advertisement
+    </sql>
+
+    <select id="selectAdvertisementList" parameterType="com.ruoyi.project.storage.domain.Advertisement" resultMap="AdvertisementResult">
+        <include refid="selectAdvertisementVo"/>
+        <where>
+            and del_flag = '0'
+            <if test="isEnable !=null and isEnable == 0">
+                and is_enable = '0'
+            </if>
+            <if test="searchValue !=null and searchValue != ''">
+                and (
+                       title like concat(#{searchValue}, '%')
+                    or img_url like concat(#{searchValue}, '%')
+                    or points = #{searchValue}
+                )
+            </if>
+        </where>
+        order by sort_no, update_time desc
+    </select>
+
+    <insert id="insertAdvertisement" parameterType="com.ruoyi.project.storage.domain.Advertisement" useGeneratedKeys="true" keyProperty="id">
+        insert into t_advertisement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null  and title != ''">title,</if>
+            <if test="content != null  and content != ''">content,</if>
+            <if test="imgUrl != null  and imgUrl != ''">img_url,</if>
+            <if test="points != null ">points,</if>
+            <if test="isEnable != null ">is_enable,</if>
+            <if test="sortNo != null ">sort_no,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="version != null ">version,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null  and title != ''">#{title},</if>
+            <if test="content != null  and content != ''">#{content},</if>
+            <if test="imgUrl != null  and imgUrl != ''">#{imgUrl},</if>
+            <if test="points != null ">#{points},</if>
+            <if test="isEnable != null ">#{isEnable},</if>
+            <if test="sortNo != null ">#{sortNo},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="version != null ">#{version},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+        </trim>
+    </insert>
+
+    <update id="updateAdvertisement" parameterType="com.ruoyi.project.storage.domain.Advertisement">
+        update t_advertisement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null  and title != ''">title = #{title},</if>
+            <if test="content != null  and content != ''">content = #{content},</if>
+            <if test="imgUrl != null  and imgUrl != ''">img_url = #{imgUrl},</if>
+            <if test="points != null ">points = #{points},</if>
+            <if test="isEnable != null ">is_enable = #{isEnable},</if>
+            <if test="sortNo != null ">sort_no = #{sortNo},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">update_by = #{updateBy},</if>
+            version = version + 1,
+            <if test="delFlag != null  and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+        and version = #{version}
+    </update>
+
+    <update id="deleteAdvertisementByIds" parameterType="Map">
+        update t_advertisement
+        set del_flag = '2',
+        version = version + 1,
+        update_time = #{time},
+        update_by = #{user}
+        where is_enable = 1
+        and id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="operateAdvertisementByIds" parameterType="Map">
+        update t_advertisement
+        set
+        <if test="operate != null and operate == 'enable'.toString()">
+            is_enable = 0,
+        </if>
+        <if test="operate != null and operate == 'disable'.toString()">
+            is_enable = 1,
+        </if>
+        version = version + 1,
+        update_time = #{time},
+        update_by = #{user}
+        where del_flag = '0'
+        and id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

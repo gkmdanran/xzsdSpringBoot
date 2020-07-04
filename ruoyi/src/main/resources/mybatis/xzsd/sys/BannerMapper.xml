@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.BannerMapper">
+
+    <insert id="insertBannerPic" parameterType="com.ruoyi.project.zxsd.sys.domain.BannerEntity">
+        INSERT INTO t_banner_info(
+          id,
+          image_url,
+          status,
+          start_time,
+          over_time,
+          sort_no,
+          gmt_create,
+          create_by,
+          gmt_modified,
+          last_modified_by,
+          is_deleted,
+          banner_code
+        )
+        VALUES (
+          #{id},
+          #{imageUrl},
+          1,
+          #{startTime},
+          #{overTime},
+          #{sortNo},
+          now(),
+          #{createBy},
+          now(),
+          #{updateBy},
+          0,
+          #{bannerCode}
+        )
+
+    </insert>
+    <update id="startStatus" parameterType="String">
+        UPDATE t_banner_info b SET b.status = 1 where banner_code=#{bannerCode}
+    </update>
+    <update id="stopStatus" parameterType="String">
+        UPDATE t_banner_info b SET b.status = 0 where banner_code=#{bannerCode}
+    </update>
+    <update id="delBannerPic" parameterType="String">
+        UPDATE t_banner_info b SET b.is_deleted = 1 where banner_code=#{bannerCode}
+    </update>
+    <select id="selectBannerPic" parameterType="com.ruoyi.project.zxsd.sys.domain.BannerEntity" resultType="com.ruoyi.project.zxsd.sys.domain.BannerEntity">
+        select
+        b.image_url as imageUrl,
+        b.status as status,
+        b.start_time as startTime,
+        b.over_time as overTime,
+        b.banner_code as bannerCode,
+        b.sort_no as sortNo
+        FROM t_banner_info b
+        where b.is_deleted=0
+        <if test="status != 3 ">
+            and b.status =#{status}
+        </if>
+        <if test="bannerCode != null and bannerCode != ''">
+            and b.banner_code =#{bannerCode}
+        </if>
+    </select>
+</mapper>

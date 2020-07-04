@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.zxsd.sys.mapper.CommentMapper">
+    <insert id="insertComment" parameterType="com.ruoyi.project.zxsd.sys.domain.CommentEntity">
+        insert INTO t_comment_info(
+        id,
+        user_name,
+        user_code,
+        sku_no,
+        star,
+        is_deleted,
+        comment_txt,
+        gmt_create,
+        create_by,
+        gmt_modified,
+        last_modified_by,
+        order_detail_code
+        )
+        VALUES (
+        #{id},
+        #{userName},
+        #{userCode},
+        #{skuNo},
+        #{star},
+        0,
+        #{commentTxt},
+        now(),
+        #{createBy},
+        now(),
+        #{updateBy},
+        #{orderDetailCode}
+        )
+
+    </insert>
+    <select id="selectComment" parameterType="com.ruoyi.project.zxsd.sys.domain.CommentEntity" resultType="com.ruoyi.project.zxsd.sys.domain.CommentEntity">
+        SELECT
+        id as id,
+        user_name as userName,
+        user_code as userCode,
+        sku_no as skuNo,
+        star as star,
+        comment_txt as commentTxt,
+        gmt_create as createTime,
+        create_by as createBy,
+        order_detail_code as orderDetailCode
+        FROM t_comment_info where is_deleted=0
+        and sku_no=#{skuNo}
+        order by gmt_create desc
+    </select>
+    <update id="editCommentStatus" parameterType="String">
+        UPDATE t_order_detail
+        set is_appraise =1
+        where order_detail_code=#{orderDetailCode}
+    </update>
+</mapper>

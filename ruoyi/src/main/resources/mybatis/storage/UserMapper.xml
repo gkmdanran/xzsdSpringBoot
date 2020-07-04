@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.storage.mapper.UserMapper">
+
+    <resultMap type="com.ruoyi.project.storage.domain.User" id="UserResult">
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="userType"    column="user_type"    />
+        <result property="email"    column="email"    />
+        <result property="phonenumber"    column="phonenumber"    />
+        <result property="sex"    column="sex"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="password"    column="password"    />
+        <result property="status"    column="status"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="loginIp"    column="login_ip"    />
+        <result property="loginDate"    column="login_date"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="currentPoints"    column="current_points"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <sql id="selectUserVo">
+        select user_id, dept_id, user_name, nick_name, user_type, email, phonenumber, sex, avatar, password, status, del_flag, login_ip, login_date, create_by, create_time, update_by, update_time, remark, current_points, version from sys_user
+    </sql>
+
+    <select id="selectUserList" parameterType="com.ruoyi.project.storage.domain.User" resultMap="UserResult">
+        <include refid="selectUserVo"/>
+        <where>
+            and del_flag = '0'
+            <if test="searchValue !=null and searchValue != ''">
+                and (
+                nick_name like concat(#{searchValue}, '%')
+                or user_name like concat(#{searchValue}, '%')
+                or phonenumber like concat(#{searchValue}, '%')
+                or email like concat(#{searchValue}, '%')
+                )
+            </if>
+            and user_type = #{userType}
+        </where>
+        order by update_time desc
+    </select>
+
+    <insert id="insertUser" parameterType="com.ruoyi.project.storage.domain.User" useGeneratedKeys="true" keyProperty="userId">
+        insert into sys_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deptId != null ">dept_id,</if>
+            <if test="userName != null  and userName != ''">user_name,</if>
+            <if test="nickName != null  and nickName != ''">nick_name,</if>
+            <if test="userType != null  and userType != ''">user_type,</if>
+            <if test="email != null  and email != ''">email,</if>
+            <if test="phonenumber != null  and phonenumber != ''">phonenumber,</if>
+            <if test="sex != null  and sex != ''">sex,</if>
+            <if test="avatar != null  and avatar != ''">avatar,</if>
+            <if test="password != null  and password != ''">password,</if>
+            <if test="status != null  and status != ''">status,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+            <if test="loginIp != null  and loginIp != ''">login_ip,</if>
+            <if test="loginDate != null ">login_date,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="currentPoints != null ">current_points,</if>
+            <if test="version != null ">version,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deptId != null ">#{deptId},</if>
+            <if test="userName != null  and userName != ''">#{userName},</if>
+            <if test="nickName != null  and nickName != ''">#{nickName},</if>
+            <if test="userType != null  and userType != ''">#{userType},</if>
+            <if test="email != null  and email != ''">#{email},</if>
+            <if test="phonenumber != null  and phonenumber != ''">#{phonenumber},</if>
+            <if test="sex != null  and sex != ''">#{sex},</if>
+            <if test="avatar != null  and avatar != ''">#{avatar},</if>
+            <if test="password != null  and password != ''">#{password},</if>
+            <if test="status != null  and status != ''">#{status},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+            <if test="loginIp != null  and loginIp != ''">#{loginIp},</if>
+            <if test="loginDate != null ">#{loginDate},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="currentPoints != null ">#{currentPoints},</if>
+            <if test="version != null ">#{version},</if>
+        </trim>
+    </insert>
+
+    <update id="updateUser" parameterType="com.ruoyi.project.storage.domain.User">
+        update sys_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null ">dept_id = #{deptId},</if>
+            <if test="nickName != null  and nickName != ''">nick_name = #{nickName},</if>
+            <if test="email != null  and email != ''">email = #{email},</if>
+            <if test="phonenumber != null  and phonenumber != ''">phonenumber = #{phonenumber},</if>
+            <if test="sex != null  and sex != ''">sex = #{sex},</if>
+            <if test="avatar != null  and avatar != ''">avatar = #{avatar},</if>
+            <if test="password != null  and password != ''">password = #{password},</if>
+            <if test="status != null  and status != ''">status = #{status},</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="loginIp != null  and loginIp != ''">login_ip = #{loginIp},</if>
+            <if test="loginDate != null ">login_date = #{loginDate},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="remark != null  and remark != ''">remark = #{remark},</if>
+            <if test="currentPoints != null ">current_points = #{currentPoints},</if>
+            version = version + 1,
+        </trim>
+        where user_id = #{userId}
+          and version = #{version}
+          and user_type = #{userType}
+    </update>
+
+    <update id="deleteUserByUserIds" parameterType="Map">
+        update sys_user
+           set del_flag = '2',
+               version = version + 1,
+               update_time = #{time},
+               update_by = #{user}
+         where status = '1'
+           and user_type = #{userType}
+           and user_id in
+            <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+                #{userId}
+            </foreach>
+    </update>
+
+    <update id="resetUserByUserIds" parameterType="Map">
+        update sys_user
+           set password = #{password},
+               version = version + 1,
+               update_time = #{time},
+               update_by = #{user}
+         where del_flag = '0'
+           and user_type = #{userType}
+           and user_id in
+        <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </update>
+
+    <update id="operateUserByUserIds" parameterType="Map">
+        update sys_user
+           set
+           <if test="operate != null and operate == 'enable'.toString()">
+               status = '0',
+           </if>
+           <if test="operate != null and operate == 'disable'.toString()">
+               status = '1',
+           </if>
+               version = version + 1,
+               update_time = #{time},
+               update_by = #{user}
+         where del_flag = '0'
+           and user_type = #{userType}
+           and user_id in
+        <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </update>
+
+    <update id="updateUserPassword" parameterType="com.ruoyi.project.storage.domain.User">
+        update sys_user
+           set password = #{password},
+               version = version + 1,
+               update_time = #{updateTime},
+               update_by = #{updateBy}
+         where del_flag = '0'
+           and user_type = #{userType}
+           and user_name = #{userName}
+    </update>
+
+    <select id="getUserPoints" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select current_points
+          from sys_user
+         where user_id = #{userId}
+           and del_flag = '0'
+    </select>
+
+    <update id="operateUserPoints" parameterType="com.ruoyi.project.storage.domain.User">
+        update sys_user
+           set current_points = current_points + #{currentPoints},
+               version = version + 1,
+               update_time = #{updateTime},
+               update_by = #{updateBy}
+         where del_flag = '0'
+           and user_id = #{userId}
+    </update>
+
+</mapper>
